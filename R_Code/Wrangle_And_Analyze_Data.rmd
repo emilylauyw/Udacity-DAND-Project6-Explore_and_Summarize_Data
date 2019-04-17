@@ -15,7 +15,9 @@ Loan Data from Prosper by Emily Lau
 # want it to. This will clean up the flow of your report.
 
 # install.packages('ggplot2', dependencies = T)
+# install.packages("dplyr")
 library(ggplot2)
+library(dplyr)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -27,26 +29,267 @@ Prosper Marketplace, Inc. is a San Francisco, California-based company in the pe
 
 # Univariate Plots Section
 
-> **Tip**: In this section, you should perform some preliminary exploration of
-your dataset. Run some summaries of the data and create univariate plots to
-understand the structure of the individual variables in your dataset. Don't
-forget to add a comment after each plot or closely-related group of plots!
-There should be multiple code chunks and text sections; the first one below is
-just to help you get started.
-
+### Data Structure
 ```{r echo=FALSE, structure}
 str(loanData)
 
 ```
 
+### Summary of the dataset
 ```{r echo=FALSE, summary}
 summary(loanData)
 
 ```
 
-Our dataset consists of 81 variables, with 11,3937 observations.
+### 1. Loan Status
+Let’s take a look at the Loan Status variable:
+```{r echo=FALSE, loanStatus}
+table(loanData$LoanStatus)
+
+```
+
+**There are 12 different loan status:**
+
+1. Cancelled
+2. Chargedoff
+3. Completed
+4. Current
+5. Defaulted
+6. FinalPaymentInProgress
+7. Past Due (>120 days)
+8. Past Due (1-15 days)
+9. Past Due (16-30 days)
+10. Past Due (31-60 days)
+11. Past Due (61-90 days)
+12. Past Due (91-120 days)
+
+* There are 6 different kinds of `PastDue` classified by different number of due days. Since I'm only concern about whether a loan is under high risk or not, I have combined all loans under 121 days of `PastDue` into one variable: `PastDue`.
+```{r echo=FALSE, combinedPastDue}
+
+#create list that I want to combine into PastDue variable
+PastDue <- c("Past Due (1-15 days)",
+             "Past Due (16-30 days)",
+             "Past Due (31-60 days)",
+             "Past Due (61-90 days)",
+             "Past Due (91-120 days)")
+```
+
+* Based on the Prosper website, a borrower loan is charged-off when it reaches 121 days past due unless the borrower is otherwise notified by Prosper. There are 16 obseravtion with `Past Due(> 120 days)` so I will combined them into `Chargedoff` variable.
+```{r echo=FALSE, combinedChargedoff}
+#create list that I want to combine into Chargedoff variable
+Chargedoff <- c("Past Due (>120 days)")
+```
+
+* There are 205 observations under `FinalPaymentInProgress` and since it is almost equivalent to `Completed`, I will combined it with `Completed`. 
+```{r echo=FALSE, combinedCompleted}
+#create list that I want to combine into Completed variable
+Completed <- c("FinalPaymentInProgress")
+```
+
+```{r echo=FALSE, updateChanges}
+#change LoanStatus format to string
+loanData$LoanStatus <- as.character(loanData$LoanStatus)
+# start change each variable
+loanData$LoanStatus[loanData$LoanStatus %in% Chargedoff] <- "Chargedoff"
+loanData$LoanStatus[loanData$LoanStatus %in% PastDue] <- "PastDue"
+loanData$LoanStatus[loanData$LoanStatus %in% Completed] <- "Completed"
+loanData$LoanStatus <- factor(loanData$LoanStatus, 
+                          levels = c("Completed",  "Current", 
+                                     "PastDue", "Chargedoff", "Defaulted", "Cancelled"), 
+                          ordered = T)
+# print out the change result
+table(loanData$LoanStatus)
+```
+
+The bar chart of the loan status:
+
+```{r echo=FALSE, LoanStatusPlot, dpi=36, out.width="700px", out.height="700px"}
+# plot LoanStatus bar chart
+ggplot(aes(x= LoanStatus, y = ..count../sum(..count..)), data = loanData) + 
+  geom_bar() +
+  xlab('Loan Status') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5)
+```
+
+**Observations:**
+
+* 34% of the loans are completed.
+* The proportion of current loan is about 50%, which means that we are not sure if half of the loan data are defaulted or completed.
+* 15% of the loans are chargedoff and defaulted which means there is risk that the investor may loss money.
 
 
+### 2. Occupation
+
+Let’s take a look at the Occupation variables:
+
+```{r echo=FALSE, occupation}
+table(loanData$Occupation)
+
+```
+
+* There are a total of 68 different occupations. I will group them using the Internation Standard Classification of Occupation.
+```{r echo=FALSE, occupationClassification}
+
+#create list that I want to combine into Chargedoff variable
+Student <- c("Student - College Freshman")
+```
+
+
+
+
+
+The bar chart of the top 10 borrower's occupation:
+```{r echo=FALSE, top10Ocupation}
+# plot Employment Status bar chart
+
+ggplot(aes(x = Occupation, y = ..count../sum(..count..)), data = loanData) + 
+  geom_bar() +
+  xlab('Employment Status') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5)
+```
+
+
+
+### 3. Employment Status
+
+Let’s take a look at the Occupation variables:
+
+```{r echo=FALSE, employmentStatus}
+table(loanData$EmploymentStatus)
+```
+
+**There are 9 different employment status:**
+
+1. Empty
+2. Employed
+3. Full-time
+4. Not available
+5. Not employed
+6. Other
+7. Part-time
+8. Retired
+9. Self-employed
+
+* There are 2,255 empty status and 5,347 `Not available` status. I will hide them for the plot since they are not required.
+* `Other` and `Not available` seems similar so that will be combined as `Other`.
+```{r echo=FALSE, employmentStatusClean}
+# combine both not available with other
+Other <- c("Not available", 
+           "Other")
+
+loanData$EmploymentStatus[loanData$EmploymentStatus %in% Other] <- "Other"
+
+# remove empty and Not available employment status
+cleanEmploymentStatus <- loanData[!(is.na(loanData$EmploymentStatus) | 
+                                      loanData$EmploymentStatus == ""), ]
+```
+
+The bar chart of the employment status:
+```{r echo=FALSE, employmentStatusPlot_Cleaned}
+# plot Employment Status bar chart
+ggplot(data=cleanEmploymentStatus, aes(x= EmploymentStatus), y = ..count../sum(..count..)) + 
+  geom_bar() +
+  xlab('Employment Status') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5)
+```
+
+**Observations:**
+
+* Quite a number of employment status are left empty (2,255).
+* Most of the borrowers are with stable income. 63% of the borrowers are employed and 25% of the borrowers are employed full-time.
+* 8.2% of the borrowers are with Other employment status.
+
+### 4. Is Borrower Homeowner
+
+Let’s take a look at the IsBorrowerHomeowner variable:
+
+```{r echo=FALSE, isBorrowerHomeowner}
+table(loanData$IsBorrowerHomeowner)
+```
+
+The bar chart of whether borrow is homeowener:
+```{r echo=FALSE, IsHomeownerPlot, dpi=36, out.width="700px", out.height="700px"}
+# plot LoanStatus bar chart
+ggplot(aes(x= IsBorrowerHomeowner, y = ..count../sum(..count..)), data = loanData) + 
+  geom_bar() +
+  xlab('Is Borrower Homeowner') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5)
+```
+
+**Observations:**
+
+* Half of the borrowers are homeowner and half of the borrowers are not.
+
+
+### 5. Income Range
+
+Let’s take a look at the Loan Status variables:
+
+```{r echo=FALSE, incomeRange}
+table(loanData$IncomeRange)
+
+```
+
+* `Not displayed` values will be hidden since it is not useful for our analysis.
+```{r echo=FALSE, rearrangeOrder}
+# remove empty and Not available employment status
+cleanIncomeRange <- loanData[!(is.na(loanData$IncomeRange) | 
+                                      loanData$IncomeRange == "" | 
+                                 loanData$IncomeRange == "Not displayed"), ]
+```
+
+The bar chart on Income Range:
+```{r echo=FALSE, IncomeRangePlot, dpi=36, out.width="1000px", out.height="700px"}
+# plot Income Range bar chart
+ggplot(aes(x= IncomeRange, y = ..count../sum(..count..)), data = cleanIncomeRange) + 
+  geom_bar() +
+  xlab('IncomeRange') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5)
+```
+
+**Observations:**
+
+* Seems like the number of borrowers who are `Not employed`(835) under `Income Range` is different from the number of borrowers who are `Not employed` under `Employment Status`(806).
+
+
+### 6. Borrower State
+
+Let’s take a look at the Borrower State variables:
+
+```{r echo=FALSE, borrowerState}
+table(loanData$BorrowerState)
+
+```
+
+
+```{r}
+qplot(x = age, data = loanData)
+
+qplot(x = loanData$StatedMonthlyIncome, data = loanData, binwidth = 1,
+      fill = I('#5760AB')) 
+
+)
+
+
+subset(loanData, LoanStatus == 'Cancelled')
+
+qplot(x= dob_day, data = loanData)
+```
 
 
 ```{r echo=FALSE, Univariate_Plots}
@@ -69,6 +312,8 @@ reflect on and summarize what you've found. Use the questions below to help you
 gather your observations and add your own if you have other thoughts!
 
 ### What is the structure of your dataset?
+
+Our dataset consists of 81 variables, with 11,3937 observations.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
