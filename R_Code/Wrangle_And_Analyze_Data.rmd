@@ -42,7 +42,7 @@ summary(loanData)
 ```
 
 ### 1. Loan Status
-Let’s take a look at the Loan Status variable:
+Let’s take a look at what are the different loan status and which status are most borrower at?
 ```{r echo=FALSE, loanStatus}
 table(loanData$LoanStatus)
 
@@ -111,7 +111,8 @@ ggplot(aes(x= LoanStatus, y = ..count../sum(..count..)), data = loanData) +
   ylab('Proportion of Borrowers') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
-            , vjust=-0.5)
+            , vjust=-0.5) +
+      ggtitle("Distribution of Loan Status")
 ```
 
 **Observations:**
@@ -123,42 +124,37 @@ ggplot(aes(x= LoanStatus, y = ..count../sum(..count..)), data = loanData) +
 
 ### 2. Occupation
 
-Let’s take a look at the Occupation variables:
+What are the borrower's occupation?
 
 ```{r echo=FALSE, occupation}
 table(loanData$Occupation)
 
 ```
 
-* There are a total of 68 different occupations. I will group them using the Internation Standard Classification of Occupation.
-```{r echo=FALSE, occupationClassification}
-
-#create list that I want to combine into Chargedoff variable
-Student <- c("Student - College Freshman")
-```
-
-
-
-
-
-The bar chart of the top 10 borrower's occupation:
+The bar chart of the borrower's occupation:
 ```{r echo=FALSE, top10Ocupation}
 # plot Employment Status bar chart
-
-ggplot(aes(x = Occupation, y = ..count../sum(..count..)), data = loanData) + 
-  geom_bar() +
-  xlab('Employment Status') +
-  ylab('Proportion of Borrowers') +  
-  geom_text(stat='count', 
-            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
-            , vjust=-0.5)
+ggplot(aes( x = Occupation ), data = subset(loanData, Occupation != '')) +
+  geom_bar(fill = '#599ad3' ) +
+  theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =10)) +
+        ggtitle("Distribution of Loans by occupation of the borrower")
 ```
 
+```{r echo=FALSE, occupationPercentage}
+# get borrower occupation percentage
+OccupationPercentage <- table(loanData$Occupation)
+round(prop.table(addmargins(OccupationPercentage)),digits=2)
+```
+
+**Observations:**
+
+* There are a total of 68 different occupations.
+* Most of the borrower's occupation is `Others`(13%) and `Professional` (6%). Seems like most borrower did not list down their occupation.
 
 
 ### 3. Employment Status
 
-Let’s take a look at the Occupation variables:
+What are the different employment status?
 
 ```{r echo=FALSE, employmentStatus}
 table(loanData$EmploymentStatus)
@@ -199,7 +195,8 @@ ggplot(data=cleanEmploymentStatus, aes(x= EmploymentStatus), y = ..count../sum(.
   ylab('Proportion of Borrowers') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
-            , vjust=-0.5)
+            , vjust=-0.5) +
+      ggtitle("Distribution of Borrower's Employment Status")
 ```
 
 **Observations:**
@@ -210,7 +207,7 @@ ggplot(data=cleanEmploymentStatus, aes(x= EmploymentStatus), y = ..count../sum(.
 
 ### 4. Is Borrower Homeowner
 
-Let’s take a look at the IsBorrowerHomeowner variable:
+Are the borrower mostly homeowner or not?
 
 ```{r echo=FALSE, isBorrowerHomeowner}
 table(loanData$IsBorrowerHomeowner)
@@ -225,17 +222,18 @@ ggplot(aes(x= IsBorrowerHomeowner, y = ..count../sum(..count..)), data = loanDat
   ylab('Proportion of Borrowers') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
-            , vjust=-0.5)
+            , vjust=-0.5) +
+      ggtitle("Propotion of homeowner")
 ```
 
 **Observations:**
 
-* Half of the borrowers are homeowner and half of the borrowers are not.
+* There is slightly more borrower who are homeowner (50.5%) than those who are not a homeowner (49.6%).
 
 
 ### 5. Income Range
 
-Let’s take a look at the Loan Status variables:
+What are the income range of the borrowers?
 
 ```{r echo=FALSE, incomeRange}
 table(loanData$IncomeRange)
@@ -259,7 +257,8 @@ ggplot(aes(x= IncomeRange, y = ..count../sum(..count..)), data = cleanIncomeRang
   ylab('Proportion of Borrowers') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
-            , vjust=-0.5)
+            , vjust=-0.5) +
+      ggtitle("Distribution of Borrower's Income Range")
 ```
 
 **Observations:**
@@ -269,41 +268,101 @@ ggplot(aes(x= IncomeRange, y = ..count../sum(..count..)), data = cleanIncomeRang
 
 ### 6. Borrower State
 
-Let’s take a look at the Borrower State variables:
+Where are most borrower from?
 
 ```{r echo=FALSE, borrowerState}
 table(loanData$BorrowerState)
 
 ```
 
+```{r echo=FALSE, borrowerStatePlot}
+ggplot(aes( x = BorrowerState ), data = subset(loanData, BorrowerState != '')) +
+  geom_bar(fill = '#599ad3' ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = .5, vjust = 0.5)) +
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5) +
 
-```{r}
-qplot(x = age, data = loanData)
+          ggtitle("Distribution of Loans by state of the borrower")
+```
 
-qplot(x = loanData$StatedMonthlyIncome, data = loanData, binwidth = 1,
-      fill = I('#5760AB')) 
+**Observations:**
 
-)
+* Most of the borrowers are from California (13.6%) followed by Texas (6.3%) and New York (6.21%).
 
 
-subset(loanData, LoanStatus == 'Cancelled')
+### 7. Loan Term
 
-qplot(x= dob_day, data = loanData)
+Let’s take a look at the loan term to see how long borrowers usually opt for loan?
+
+```{r echo=FALSE, loanTerm}
+table(loanData$Term)
+
 ```
 
 
-```{r echo=FALSE, Univariate_Plots}
+The bar chart on loan term:
+```{r echo=FALSE, loanTermPlot, dpi=36, out.width="1000px", out.height="700px"}
+# plot Income Range bar chart
+ggplot(aes(x= (Term/12), y = ..count../sum(..count..)), data = loanData) + 
+  geom_bar() +
+  xlab('Loan Term (years)') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5) +
+        ggtitle("Distribution of Loan Term")
+```
+
+**Observations:**
+
+* There are 3 types of loan term - 12 months, 36 months and 60 months.
+* 77% of the borrowers opt for 3 years loan term.
+* Only 1% of the borrowers opt for 1 year loan term. Seems like most borrower are not interested in short loan term.
+
+
+### 8. Prosper Rating (Alpha)
+
+Let’s take a look at the prosper rating (Alpha)
+
+```{r echo=FALSE, prosperRating}
+table(loanData$ProsperRating..Alpha.)
 
 ```
 
+```{r, Prosper Rating}
+# plot LoanStatus bar chart
+loanData$ProsperRating <- factor(loanData$ProsperRating, 
+                          levels = c('AA', 'A', 'B', 'C', 'D', 'E', 'HR', 'NA'), 
+                          ordered = T)
+
+ggplot(aes(x= ProsperRating, y = ..count../sum(..count..)), data = loanData) + 
+  geom_bar() +
+  xlab('Prosper Rating') +
+  ylab('Proportion of Borrowers') +  
+  geom_text(stat='count', 
+            aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
+            , vjust=-0.5) +
+      ggtitle("Distribution of Prosper Rating")
+```
+
+**Observations:**
+
+* There is huge percentage of prosper rating as NA (25.53%). 
+* The highest prosper rating is C with 16.1% followed by B(13.68%) and A(12.77%).
 
 
 
-> **Tip**: Make sure that you leave a blank line between the start / end of
-each code block and the end / start of your Markdown text so that it is
-formatted nicely in the knitted text. Note as well that text on consecutive
-lines is treated as a single space. Make sure you have a blank line between
-your paragraphs so that they too are formatted for easy readability.
+
+
+
+
+
+
+
+
+
+
 
 # Univariate Analysis
 
@@ -317,10 +376,19 @@ Our dataset consists of 81 variables, with 11,3937 observations.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
+Borrower: `Prosper Score` and `Proser Rating` seems to be the main indicators of a quality of borrowers.
+
+Lender: `Lender Yield` seems to the most important factor for investor.
+
 ### What other features in the dataset do you think will help support your \
 investigation into your feature(s) of interest?
 
+Properties about borrower such as `Employment Status`, `Income Range`, `Loan Term`.
+
 ### Did you create any new variables from existing variables in the dataset?
+
+Yes I created some new variables and factorized a few others. Also the date into month and year for analysis.
+
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
@@ -335,9 +403,67 @@ yourself to relationships between a main output feature and one of the
 supporting variables. Try to look at relationships between supporting variables
 as well.
 
-```{r echo=FALSE, Bivariate_Plots}
+### 1. Lender Yield vs Prosper Rating
+
+Is there a relation between lender yield and prosper rating?
+
+```{r echo=FALSE, ProsperRatingvsLenderYield}
+loanData$ProsperRating..Alpha. <- factor(loanData$ProsperRating..Alpha., levels = c("AA", "A", "B", "C", "D", "E", "HR") )
+# create boxplot
+ggplot(aes( x = ProsperRating..Alpha., y = LenderYield ), data = subset(loanData, ProsperRating..Alpha. != "")) +
+  geom_boxplot() + 
+    ggtitle("Lender Yield vs Prosper Rating")
+```
+
+**Observation:**
+
+* There's a clear relation between the two, the higher the lender yield, the poorer is the Prosper Rating.
+
+### 2. Borrower Rate vs Prosper Rating
+
+Is there a relation between borrower rate and prosper rating?
+
+```{r echo=FALSE, borrowerRatevsProsperRating}
+ggplot(aes(x = ProsperRating..Alpha., y = BorrowerRate), data = subset(loanData, ProsperRating..Alpha. != "")) +
+  geom_boxplot() +
+    ggtitle("Borrower Rate vs Prosper Rating")
 
 ```
+
+**Observation:**
+
+* The borrower rate actually is quite similar to the Lender Yield. The relationship observed here is also similar to the lender yield.
+
+
+### 3. Loan Orignal Amount vs Prosper Rating
+
+Is there a relation between loan original amount and prosper rating?
+
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(aes( x = ProsperRating..Alpha., y = LoanOriginalAmount ), data = subset(loanData, ProsperRating..Alpha. != "")) +
+  geom_boxplot()  + 
+    coord_cartesian(ylim = c(0,20000)) + 
+      ggtitle("Loan Orignal Amount vs Prosper Rating")
+
+```
+
+**Observation:**
+
+* The Median Loan Amount appears to decrease as the prosper rating gets poorer.
+
+
+
+```{r echo=FALSE, Bivariate_Plots}
+
+
+```
+
+
+
+
+
+
+
 
 # Bivariate Analysis
 
