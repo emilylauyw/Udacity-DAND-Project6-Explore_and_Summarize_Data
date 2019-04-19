@@ -5,22 +5,21 @@ Loan Data from Prosper by Emily Lau
 # Load all of the packages that you end up using in your analysis in this code
 # chunk.
 
-# Notice that the parameter "echo" was set to FALSE for this code chunk. This
-# prevents the code from displaying in the knitted HTML output. You should set
-# echo=FALSE for all code chunks in your file, unless it makes sense for your
-# report to show the code that generated a particular plot.
-
-# The other parameters for "message" and "warning" should also be set to FALSE
-# for other code chunks once you have verified that each plot comes out as you
-# want it to. This will clean up the flow of your report.
-
 # install.packages('ggplot2', dependencies = T)
 # install.packages("dplyr")
+# install.packages("lubridate")
 library(ggplot2)
-library(dplyr)
+#library(dplyr)
+
+# knitr: Suppress code/messages/warnings 
+#        Set default plot options and center them
+knitr::opts_chunk$set(fig.width=9,fig.height=5,fig.path='Figs/',
+                      fig.align='center',tidy=TRUE,
+                      echo=FALSE,warning=FALSE,message=FALSE)
+
 ```
 
-```{r echo=FALSE, Load_the_Data}
+```{r echo=FALSE, loadData}
 # Load the Data
 loanData <- read.csv('prosperLoanData.csv')
 ```
@@ -65,7 +64,6 @@ table(loanData$LoanStatus)
 
 * There are 6 different kinds of `PastDue` classified by different number of due days. Since I'm only concern about whether a loan is under high risk or not, I have combined all loans under 121 days of `PastDue` into one variable: `PastDue`.
 ```{r echo=FALSE, combinedPastDue}
-
 #create list that I want to combine into PastDue variable
 PastDue <- c("Past Due (1-15 days)",
              "Past Due (16-30 days)",
@@ -104,11 +102,11 @@ table(loanData$LoanStatus)
 The bar chart of the loan status:
 
 ```{r echo=FALSE, LoanStatusPlot, dpi=36, out.width="700px", out.height="700px"}
-# plot LoanStatus bar chart
+# plot Loan Status bar chart
 ggplot(aes(x= LoanStatus, y = ..count../sum(..count..)), data = loanData) + 
   geom_bar() +
   xlab('Loan Status') +
-  ylab('Proportion of Borrowers') +  
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -128,15 +126,16 @@ What are the borrower's occupation?
 
 ```{r echo=FALSE, occupation}
 table(loanData$Occupation)
-
 ```
 
 The bar chart of the borrower's occupation:
-```{r echo=FALSE, top10Ocupation}
+```{r echo=FALSE, ocupation}
 # plot Employment Status bar chart
 ggplot(aes( x = Occupation ), data = subset(loanData, Occupation != '')) +
   geom_bar(fill = '#599ad3' ) +
-  theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =10)) +
+  xlab('Occupation') +
+  ylab('No. of Borrowers') +  
+    theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =10)) +
         ggtitle("Distribution of Loans by occupation of the borrower")
 ```
 
@@ -192,7 +191,7 @@ The bar chart of the employment status:
 ggplot(data=cleanEmploymentStatus, aes(x= EmploymentStatus), y = ..count../sum(..count..)) + 
   geom_bar() +
   xlab('Employment Status') +
-  ylab('Proportion of Borrowers') +  
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -215,11 +214,11 @@ table(loanData$IsBorrowerHomeowner)
 
 The bar chart of whether borrow is homeowener:
 ```{r echo=FALSE, IsHomeownerPlot, dpi=36, out.width="700px", out.height="700px"}
-# plot LoanStatus bar chart
+# plot Loan Status bar chart
 ggplot(aes(x= IsBorrowerHomeowner, y = ..count../sum(..count..)), data = loanData) + 
   geom_bar() +
   xlab('Is Borrower Homeowner') +
-  ylab('Proportion of Borrowers') +  
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -253,8 +252,8 @@ The bar chart on Income Range:
 # plot Income Range bar chart
 ggplot(aes(x= IncomeRange, y = ..count../sum(..count..)), data = cleanIncomeRange) + 
   geom_bar() +
-  xlab('IncomeRange') +
-  ylab('Proportion of Borrowers') +  
+  xlab('Income Range ($)') +
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -276,8 +275,11 @@ table(loanData$BorrowerState)
 ```
 
 ```{r echo=FALSE, borrowerStatePlot}
+# plot borrower state bar chart
 ggplot(aes( x = BorrowerState ), data = subset(loanData, BorrowerState != '')) +
   geom_bar(fill = '#599ad3' ) +
+  xlab('Borrower State') +
+  ylab('No. of Borrowers') +  
   theme(axis.text.x = element_text(angle = 90, hjust = .5, vjust = 0.5)) +
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
@@ -306,8 +308,8 @@ The bar chart on loan term:
 # plot Income Range bar chart
 ggplot(aes(x= (Term/12), y = ..count../sum(..count..)), data = loanData) + 
   geom_bar() +
-  xlab('Loan Term (years)') +
-  ylab('Proportion of Borrowers') +  
+  xlab('Loan Term (Year)') +
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -330,16 +332,16 @@ table(loanData$ProsperRating..Alpha.)
 
 ```
 
-```{r, Prosper Rating}
-# plot LoanStatus bar chart
-loanData$ProsperRating <- factor(loanData$ProsperRating, 
+```{r echo=FALSE, ProsperRating}
+# plot Loan Status bar chart
+loanData$ProsperRating <- factor(loanData$ProsperRating..Alpha, 
                           levels = c('AA', 'A', 'B', 'C', 'D', 'E', 'HR', 'NA'), 
                           ordered = T)
 
 ggplot(aes(x= ProsperRating, y = ..count../sum(..count..)), data = loanData) + 
   geom_bar() +
   xlab('Prosper Rating') +
-  ylab('Proportion of Borrowers') +  
+  ylab('Proportion of Borrowers (%)') +  
   geom_text(stat='count', 
             aes(label= paste(round(..count../sum(..count..)*100, 2),"%"))
             , vjust=-0.5) +
@@ -351,24 +353,62 @@ ggplot(aes(x= ProsperRating, y = ..count../sum(..count..)), data = loanData) +
 * There is huge percentage of prosper rating as NA (25.53%). 
 * The highest prosper rating is C with 16.1% followed by B(13.68%) and A(12.77%).
 
+### 9. Listing Creation Date
 
+Which month or year had the most loan?
 
+```{r echo=FALSE, loanMonth}
+loanData$ListingCreationMonth <- as.factor(lubridate::month(loanData$ListingCreationDate))
+loanData$ListingCreationYear <- as.factor(lubridate::year(loanData$ListingCreationDate))
 
+# create Loan listing plot by Month
+ggplot(aes(x = ListingCreationMonth), data = loanData) +
+  geom_bar(fill = '#599ad3', color = 'black') + 
+  xlab('Loan Listing Creation (Month)') +
+  ylab('No. of Borrowers') +  
+    scale_x_discrete(breaks = seq(1,12,1)) + 
+      geom_text( stat = 'count', aes(label = ..count..), size = 3, vjust = -1) +
+        ggtitle("Loan Creation by Month")
+```
 
+**Observations:**
 
+* March (8,032) & April (7,661) have relatively lesser loan.
+* January (11,214) had the highest number of loan.
 
+```{r echo=FALSE, loanYearMonth}
+# create Loan listing plot by Year & Month
+ggplot(aes(x = ListingCreationMonth), data = loanData) +
+  geom_bar(fill = '#599ad3', color = 'black') + 
+  xlab('Loan Listing Creation (Year & Month)') +
+  ylab('No. of Borrowers') +  
+      facet_wrap(~ ListingCreationYear, ncol = 2 ) +
+      scale_x_discrete(breaks = seq(1,12,1)) + 
+        scale_y_sqrt() +
+          ggtitle("Loan Creation by Year & Month")
+```
 
+**Observations:**
 
+* Increase in the loans as year pass by except in Oct-2018 to 2019.
 
+```{r echo=FALSE, loanYear}
+# create Loan listing plot by Year
+ggplot(aes(x = ListingCreationYear), data = loanData) +
+  geom_bar(fill = '#599ad3', color = 'black') + 
+  xlab('Loan Listing Creation (Year)') +
+  ylab('No. of Borrowers') +  
+      geom_text( stat = 'count', aes(label = ..count..), size = 3, vjust = -1) +
+          ggtitle("Loan Creation by Year")
+```
 
+**Observations:**
 
+* Sudden decrease of number of loan in 2009 (2,206).
+* After a Google search was done, the decrease of number of loan in 2009 was due to the Prosper Quiet Period from October 15, 2008 until July 13, 2009. They closed down the borrower side of the business as well as the investor side. No new loans were issued during the Prosper quiet period. (Reference: https://www.lendacademy.com/a-look-back-at-the-lending-club-and-prosper-quiet-periods/)
 
 
 # Univariate Analysis
-
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
 
 ### What is the structure of your dataset?
 
@@ -387,21 +427,25 @@ Properties about borrower such as `Employment Status`, `Income Range`, `Loan Ter
 
 ### Did you create any new variables from existing variables in the dataset?
 
-Yes I created some new variables and factorized a few others. Also the date into month and year for analysis.
+Yes I created some new variables and factorized a few others:
 
+* `LoanStatus`: clean up the 12 different loan status into 6.
+* `EmploymentStatus`: clean up the 9 different employment status into 9.
+* Splited `ListingCreationDate` into Year and month for analysis
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
 
+There are a number of empty fields and NA fields which create spikes in the plots:
+
+* `EmploymentStatus` contains 2,255 empty blanks and 5,347 NA.
+* `IncomeRange` contains a number of `Not displayed` values.
+* 26% of `ProsperRating` is NA.
+
+Had remove the blank and NA which are not required information for the plots creation.
 
 # Bivariate Plots Section
-
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
 
 ### 1. Lender Yield vs Prosper Rating
 
@@ -409,89 +453,253 @@ Is there a relation between lender yield and prosper rating?
 
 ```{r echo=FALSE, ProsperRatingvsLenderYield}
 loanData$ProsperRating..Alpha. <- factor(loanData$ProsperRating..Alpha., levels = c("AA", "A", "B", "C", "D", "E", "HR") )
-# create boxplot
+# create boxplot - Lender Yield and Prosper Rating
 ggplot(aes( x = ProsperRating..Alpha., y = LenderYield ), data = subset(loanData, ProsperRating..Alpha. != "")) +
   geom_boxplot() + 
-    ggtitle("Lender Yield vs Prosper Rating")
+  xlab('Prosper Rating') +
+  ylab('Lender Yield (bps)') +  
+      ggtitle("Lender Yield vs Prosper Rating")
 ```
 
 **Observation:**
 
-* There's a clear relation between the two, the higher the lender yield, the poorer is the Prosper Rating.
+* There's a clear relation between the two, the higher the lender yield, the lower is the Prosper Rating.
 
 ### 2. Borrower Rate vs Prosper Rating
 
 Is there a relation between borrower rate and prosper rating?
 
 ```{r echo=FALSE, borrowerRatevsProsperRating}
+# create boxplot - Borrower Rate and Prosper Rating
 ggplot(aes(x = ProsperRating..Alpha., y = BorrowerRate), data = subset(loanData, ProsperRating..Alpha. != "")) +
   geom_boxplot() +
-    ggtitle("Borrower Rate vs Prosper Rating")
-
+  xlab('Prosper Rating') +
+  ylab('Borrower Rate (bps)') +  
+      ggtitle("Borrower Rate vs Prosper Rating")
 ```
 
 **Observation:**
 
-* The borrower rate actually is quite similar to the Lender Yield. The relationship observed here is also similar to the lender yield.
+* The borrower rate is quite similar to the Lender Yield. The relationship observed here is also similar to the lender yield.
 
 
 ### 3. Loan Orignal Amount vs Prosper Rating
 
 Is there a relation between loan original amount and prosper rating?
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, loanAmtvsProsperRating}
+# create boxplot - Loan Amount and Prosper Rating
 ggplot(aes( x = ProsperRating..Alpha., y = LoanOriginalAmount ), data = subset(loanData, ProsperRating..Alpha. != "")) +
   geom_boxplot()  + 
+  xlab('Prosper Rating') +
+  ylab('Loan Amount ($)') +  
     coord_cartesian(ylim = c(0,20000)) + 
       ggtitle("Loan Orignal Amount vs Prosper Rating")
-
 ```
 
 **Observation:**
 
 * The Median Loan Amount appears to decrease as the prosper rating gets poorer.
 
+### 4. Borrower Monthly Income vs Prosper Rating
 
+Is there a relation between monthly income and prosper rating?
 
-```{r echo=FALSE, Bivariate_Plots}
-
-
+```{r echo=FALSE, borrowerIncomevsProsperRating}
+# create boxplot - borrower monthly income and prosper rating
+ggplot(aes(x = ProsperRating..Alpha., y = StatedMonthlyIncome), data = subset(loanData, ProsperRating..Alpha. != "")) +
+  geom_boxplot() +
+  xlab('Prosper Rating') +
+  ylab('Borrower Monthly Income ($)') +  
+     coord_cartesian(ylim = c(0,10000)) +
+    ggtitle("Monthly Income of Borrower vs Prosper Rating")
 ```
 
+**Observation:**
 
+* The Monthly Income of the borrower shows a slight decrease as the rating gets poorer.
 
+### 5. Monthly Income of Borrower vs Original Amount of the Loan
 
+Is there a relation between monthly income and loan amount?
 
+```{r echo=FALSE, monthlyIncomevsOriginalAmt}
+# create scatterplot - borrower monthly income and loan amount
+ggplot(aes(y = StatedMonthlyIncome, x = LoanOriginalAmount), data = subset(loanData, !is.na(StatedMonthlyIncome))) +
+  geom_point( alpha = 1/20, position = position_jitter(h = 0) ) + 
+      coord_cartesian(ylim = c(0, 50000)) +
+      xlab('Loan Amount ($)') +
+      ylab('Monthly Income ($)') +  
+            geom_smooth() +
+            ggtitle("Monthly Income of Borrower vs Original Amount of the Loan")
+```
 
+**Observation:**
+
+* As the Loan Amount increases, the median monthly income also increases. Another interesting trend is that the Loan amount values appear to be discrete as the Loan amounts are usually round figures rather than random values.
+
+### 6. Borrower Rate vs Status of Loan
+
+Is there a relation between borrower rate and loan status?
+
+```{r echo=FALSE, borrowerRatevsStatusOfLoan}
+# create boxplot - borrower rate and loan status
+ggplot(aes( x = LoanStatus, y = BorrowerRate ), data = loanData) +
+  geom_boxplot() + 
+    theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =10)) +
+      xlab('Loan Status') +
+      ylab('Borrower Rate (bps)') +  
+        ggtitle("Borrower Rate vs Status of Loan")
+```
+
+**Observation:**
+
+* The median of Borrower Rate for defaulted and chargedoff loans appear to be a bit higher than the others.
+
+### 7. Occupation of Borrower vs Original Amount of Loan
+
+Is there a relation between occupation and loan amount?
+
+```{r echo=FALSE, occupationVsLoanAmt, fig.width = 12, fig.height = 8}
+# create boxplot - occupation and loan amount
+ggplot(aes( x = Occupation, y = LoanOriginalAmount ), data = loanData) +
+  geom_boxplot() + 
+      xlab('Occupation') +
+      ylab('Loan Amount ($)') +  
+      theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =7)) +
+      ggtitle("Occupation of Borrower vs Original Amount of Loan") +
+  coord_flip(ylim = c(0, 20000))+
+  theme(axis.text.y = element_text( size =9))
+```
+
+**Observation:**
+
+* This shows the variations in the amount taken as loan by people from different occupation.
+* Occupation such as Judge have quite a range difference in loan amount.
+
+### 8. Occupation of Borrower vs his Monthly Income
+
+Is there a relation between occupation and monthly income?
+
+```{r echo=FALSE, OccupationVsMonthlyIncome, fig.width = 12, fig.height = 8}
+# create boxplot - occupation and monthly income
+ggplot(aes( x = Occupation, y = StatedMonthlyIncome ), data = loanData) +
+  geom_boxplot() + 
+      xlab('Occupation') +
+      ylab('Monthly Income ($)') +  
+      theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =7)) + 
+      coord_cartesian(ylim = c(0, 20000)) +
+        ggtitle("Occupation of Borrower vs his Monthly Income")+
+  coord_flip(ylim = c(0, 20000))+
+  theme(axis.text.y = element_text( size =9))
+```
+
+**Observation:**
+
+* The variation in monthly income for different occupations.
+* Occupation such as Doctor have quite a high range in Income.
 
 
 # Bivariate Analysis
-
-> **Tip**: As before, summarize what you found in your bivariate explorations
-here. Use the questions below to guide your discussion.
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+There is clear relation between `Prosper Rating`, `Lender Yield`, `Borrower Rate` and `Loan Amount`.
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+`Borrower Rate` and `Lender Yield` have a linear relationship.
+
 ### What was the strongest relationship you found?
 
+`Borrower rate` and `Lender Yield`.
 
 # Multivariate Plots Section
 
-> **Tip**: Now it's time to put everything together. Based on what you found in
-the bivariate plots section, create a few multivariate plots to investigate
-more complex interactions between variables. Make sure that the plots that you
-create here are justified by the plots you explored in the previous section. If
-you plan on creating any mathematical models, this is the section where you
-will do that.
-
-```{r echo=FALSE, Multivariate_Plots}
-
+### 1. Lender Yield vs Loan Amount vs Prosper Rating
+```{r echo=FALSE, lenderYieldvsLoanAmtvsProsperRating}
+# create scatterplot - lender yield, loan amoount and prosper rating
+ggplot(aes(x = LenderYield, y = LoanOriginalAmount, color = ProsperRating..Alpha.),
+       data = subset(loanData, !is.na(ProsperRating..Alpha.) & !is.na(LoanOriginalAmount) )) +
+  geom_point(alpha = 1/2, position = position_jitter(h=0) ) +
+      xlab('Lender Yield (bps)') +
+      ylab('Loan Amount ($)') +  
+      coord_cartesian(ylim = c(0, 20000)) + 
+      ggtitle("Lender Yield vs Loan Amount vs Prosper Rating") +
+  scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
+                     direction=-1)+
+  theme(panel.grid.minor = element_blank(), 
+        panel.background = element_rect(fill = "darkgrey"))  
+  guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
+
+**Observation:**
+
+* As the Lender Yield increases, the Prosper Rating gets poorer.
+
+
+### 2. Monthly Income vs Loan Amount vs Prosper Rating
+```{r echo=FALSE, monthlyIncomeVsLoanAmountVsProsperRating}
+# create scatterplot - monthly income, loan amount and prosper
+ggplot(aes(x = StatedMonthlyIncome, y = LoanOriginalAmount, color = ProsperRating..Alpha.),
+       data = subset(loanData, !is.na(ProsperRating..Alpha.) )) +
+  geom_point(alpha = 1/2, position = position_jitter(h=0)) +
+      xlab('Monthly Income ($)') +
+      ylab('Loan Amount ($)') +  
+      coord_cartesian(xlim = c(0, 20000)) +
+      ggtitle("Monthly Income vs Loan Amount vs Prosper Rating")+
+  scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
+                     direction=-1)+
+  theme(panel.grid.minor = element_blank(), 
+        panel.background = element_rect(fill = "darkgrey"))  
+  guides(color=guide_legend(override.aes = list(alpha = 1)))
+```
+
+**Observation:**
+
+* As the Loan Amount increases, the Prosper Rating gets better.
+
+### 3. Lender Yield vs Monthly Income vs Prosper Rating
+```{r echo=FALSE, LenderYieldVsMonthlyIncomeVsProsperRating}
+# create scatterplot - lender yield, monthly and prosper rating
+ggplot(aes(x = LenderYield, y = StatedMonthlyIncome, color = ProsperRating..Alpha.),
+       data = subset(loanData, ProsperRating..Alpha. != "" )) +
+      xlab('Lender Yield (bps)') +
+      ylab('Monthly Income ($)') +  
+    geom_point(alpha = 1/2, position = position_jitter(h=0)) +
+    coord_cartesian(ylim = c(0, 20000)) +    
+      ggtitle("Lender Yield vs Monthly Income vs Prosper Rating")+
+  scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
+                     direction=-1)+
+  theme(panel.grid.minor = element_blank(), 
+        panel.background = element_rect(fill = "darkgrey"))  
+  guides(color=guide_legend(override.aes = list(alpha = 1)))
+```
+
+**Observation:**
+
+* Borrower's monthly income does not seems to have any relation with the Prosper Rating.
+
+### 4. Lender Yield vs Borrower Rate vs Prosper Rating
+```{r echo=FALSE, LenderYieldVsBorrowerRateVsProsperRating}
+# create scatterplot - lener yield, borrower rate and prosper rating
+ggplot(aes(x = LenderYield, y = BorrowerRate, color = ProsperRating..Alpha.),
+       data = subset(loanData, ProsperRating..Alpha. != "" )) +
+      xlab('Lender Yield (bps)') +
+      ylab('Borrower Rate (bps') +  
+    geom_point(alpha = 1/2, position = position_jitter(h=0)) +
+    ggtitle("Lender Yield vs Borrower Rate vs Prosper Rating") +
+  scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
+                     direction=-1)
+```
+**Observation:**
+
+* Borrower Rate and Lender Yield variables have a strongly positive linear relationship between them. Both rise above their means or fall below their means at the same time.
+* As Borrower Rate and Lender Yield increases, the prosper rating gets poorer.
+
 
 # Multivariate Analysis
 
@@ -499,54 +707,75 @@ will do that.
 investigation. Were there features that strengthened each other in terms of \
 looking at your feature(s) of interest?
 
+Based on the above analysis, I can see that there are relation between Lender yield, Borrower rate and Loan amount in predicting the Prosper Rating.
+
 ### Were there any interesting or surprising interactions between features?
 
-### OPTIONAL: Did you create any models with your dataset? Discuss the \
-strengths and limitations of your model.
+`Borrower Rte` and `Lender Yield` have a strongly positive linear relationship.
+
 
 ------
 
 # Final Plots and Summary
 
-> **Tip**: You've done a lot of exploration and have built up an understanding
-of the structure of and relationships between the variables in your dataset.
-Here, you will select three plots from all of your previous exploration to
-present here as a summary of some of your most interesting findings. Make sure
-that you have refined your selected plots for good titling, axis labels (with
-units), and good aesthetic choices (e.g. color, transparency). After each plot,
-make sure you justify why you chose each plot by describing what it shows.
-
-### Plot One
+### Plot One: Sudden drop of loan in 2009
 ```{r echo=FALSE, Plot_One}
-
+# create Loan listing plot by Year & Month
+ggplot(aes(x = ListingCreationMonth), data = loanData) +
+  geom_bar(fill = '#599ad3', color = 'black') + 
+  xlab('Loan Listing Creation (Year & Month)') +
+  ylab('No. of Borrowers') +  
+      facet_wrap(~ ListingCreationYear, ncol = 2 ) +
+      scale_x_discrete(breaks = seq(1,12,1)) + 
+        scale_y_sqrt() +
+          ggtitle("Loan Creation by Year & Month")
 ```
 
-### Description One
+This plot is useful as it shows there was a sudden drop in loan during Oct-2008 to Jun-2009. It was after a Google search and I realized the decrease of number of loan in 2009 was due to the Prosper Quiet Period from October 15, 2008 until July 13, 2009. They closed down the borrower side of the business as well as the investor side. No new loans were issued during the Prosper quiet period. (Reference: https://www.lendacademy.com/a-look-back-at-the-lending-club-and-prosper-quiet-periods/)
+
+### Plot Two: Relationship between Borrower Occupation and Monthly Income
+```{r echo=FALSE, Plot_Three, fig.width = 12, fig.height = 8}
+# create boxplot - occupation and monthly income
+ggplot(aes( x = Occupation, y = StatedMonthlyIncome ), data = loanData) +
+  geom_boxplot() + 
+      xlab('Occupation') +
+      ylab('Monthly Income ($)') +  
+      theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2, size =7)) + 
+      coord_cartesian(ylim = c(0, 20000)) +
+        ggtitle("Occupation of Borrower vs his Monthly Income")+
+  coord_flip(ylim = c(0, 20000))+
+  theme(axis.text.y = element_text( size =9))
+```
+
+This plot is interesting as the above diagram tells alot of information. It shows the variation in borrower's monthly income for the different occupation. Occupation such as Doctor have quite a high range in monthly income. Most people had selected others and professionals as their occupation. Obviously the students have the lower range in monthly income.
 
 
-### Plot Two
+### Plot Three: Relationship between Lender Yield, Loan Amount and Prosper Rating
 ```{r echo=FALSE, Plot_Two}
-
+# create scatterplot - lender yield, loan amount and prosper
+ggplot(aes(x = LenderYield, y = LoanOriginalAmount, color = ProsperRating..Alpha.),
+       data = subset(loanData, !is.na(ProsperRating..Alpha.) & !is.na(LoanOriginalAmount) )) +
+  geom_point(alpha = 1/2, position = position_jitter(h=0) ) +
+      xlab('Lender Yield (bps)') +
+      ylab('Loan Amount ($)') +  
+      coord_cartesian(ylim = c(0, 20000)) + 
+      ggtitle("Lender Yield vs Loan Amount vs Prosper Rating") +
+  scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
+                     direction=-1)+
+  theme(panel.grid.minor = element_blank(), 
+        panel.background = element_rect(fill = "darkgrey"))  
+  guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
 
-### Description Two
+The above plot is useful by showing the relationship between Lender Yield, Loan Amount and Prosper Rating. As the Lender Yield gets higher.
 
-
-### Plot Three
-```{r echo=FALSE, Plot_Three}
-
-```
-
-### Description Three
 
 ------
 
 # Reflection
 
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset.
+The Loan Data from Prosper was a challenging data set but a good and useful way for me to learn and experience doing exploratory data analysis with R. It was diffult due to large number of data and variables available. It took me some time to figure out which are the the useful variables and which are the ones that I want to focus on. 
 
-> **Tip**: Don't forget to remove this, and the other **Tip** sections before
-saving your final work and knitting the final report!
+This project made me to appreciate all the wonderful visualizations and ways to reveal underlining information hidden in a dataset. Th experience gained with this dataset definitely improved my EDA skills. I tried to keep all my visualization as simple as possible to make them easy to read.
+
+The analysis could be enriched in future work with more analysis done on the other variables or look at the variables through the investors side or borrowers side. I also want to learn and explore mode different useful plots and graphs.
