@@ -1,4 +1,20 @@
-Loan Data from Prosper by Emily Lau
+---
+title: "Loan Data from Prosper"
+author: "Emily Lau"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
+    df_print: paged
+    highlight: tango
+    theme: journal
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -632,7 +648,7 @@ ggplot(aes(x = LenderYield, y = LoanOriginalAmount, color = ProsperRating..Alpha
   scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
                      direction=-1)+
   theme(panel.grid.minor = element_blank(), 
-        panel.background = element_rect(fill = "darkgrey"))  
+        panel.background = element_rect(fill = "darkgrey"))+  
   guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
 
@@ -654,7 +670,7 @@ ggplot(aes(x = StatedMonthlyIncome, y = LoanOriginalAmount, color = ProsperRatin
   scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
                      direction=-1)+
   theme(panel.grid.minor = element_blank(), 
-        panel.background = element_rect(fill = "darkgrey"))  
+        panel.background = element_rect(fill = "darkgrey"))+  
   guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
 
@@ -675,7 +691,7 @@ ggplot(aes(x = LenderYield, y = StatedMonthlyIncome, color = ProsperRating..Alph
   scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
                      direction=-1)+
   theme(panel.grid.minor = element_blank(), 
-        panel.background = element_rect(fill = "darkgrey"))  
+        panel.background = element_rect(fill = "darkgrey"))+  
   guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
 
@@ -763,7 +779,7 @@ ggplot(aes(x = LenderYield, y = LoanOriginalAmount, color = ProsperRating..Alpha
   scale_color_brewer(palette = "RdYlBu", name="Prosper\nRating",
                      direction=-1)+
   theme(panel.grid.minor = element_blank(), 
-        panel.background = element_rect(fill = "darkgrey"))  
+        panel.background = element_rect(fill = "darkgrey"))+  
   guides(color=guide_legend(override.aes = list(alpha = 1)))
 ```
 
