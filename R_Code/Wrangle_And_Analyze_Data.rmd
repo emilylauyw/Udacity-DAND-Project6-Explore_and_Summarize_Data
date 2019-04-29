@@ -428,7 +428,7 @@ ggplot(aes(x = ListingCreationYear), data = loanData) +
 
 ### What is the structure of your dataset?
 
-Our dataset consists of 81 variables, with 11,3937 observations.
+Our dataset consists of 81 variables, with 113,937 observations.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
